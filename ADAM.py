@@ -826,5 +826,5 @@ def download_report(teacher_id):
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', ''.join(random.choices(string.ascii_letters + string.digits + "!@#$%^&*()", k=32)))
 
 
-if __name__=='__main__':
-   app.run(host='0.0.0.0',debug=False)
+# if __name__=='__main__':
+#    app.run(host='0.0.0.0',debug=False)
