@@ -6,8 +6,8 @@
 
 ## ✨ Key Features
 
-* **Dynamic Quiz Generation:** Creates unique, challenging quizzes using the **OpenAI API** based on uploaded documents or specific topics.
-* **Time-Bound Teacher IDs:** Generates a temporary **15-minute** teacher ID for setting up and managing a new assessment session.
+* **Dynamic Quiz Generation:** Creates unique, challenging quizzes using the **OpenRouter API** based on uploaded documents or specific topics.
+* **Time-Bound Teacher IDs:** Generates a temporary **50-minute** teacher ID for setting up and managing a new assessment session.
 * **Unique Quiz IDs:** Each quiz session is assigned a unique Quiz ID that students use to access and attempt the assessment.
 * **Secure Student Attempt:** Students can attempt the quiz using the generated Quiz ID.
 * **Automated Mark Sheet:** Teachers can easily download the comprehensive mark sheet (CSV/XLSX) for the assessment session.
@@ -49,7 +49,7 @@ Follow these steps to get a local copy of ADAM up and running on your machine.
     * ADAM requires access to the OpenAI API for quiz generation.
     * Create a file named `.env` in the root directory and add your key:
         ```
-        OPENAI_API_KEY="YOUR_API_KEY" 
+        OPENROUTER_API_KEY="YOUR_API_KEY" 
         ```
     * *Note: Ensure your `requirements.txt` includes the `openai` and `python-dotenv` packages.*
 
@@ -110,10 +110,11 @@ Contributions are greatly appreciated. Please follow the standard GitHub fork an
 
 ## 📄 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the Apache License. See `LICENSE` for more information.
 
 ---
 
 ## 📧 Contact
 
 will be available soon.
+
