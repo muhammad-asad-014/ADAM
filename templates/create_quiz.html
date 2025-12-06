@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Quiz - ADAM: A Dynamic Assessment Module</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+
+<style>
+    /* 🎨 Theme Colors (Consistent with Student Portal) */
+    :root {
+        --background-light: #f0f8ff; /* Alice Blue (Very Light Background) */
+        --panel-background: #ffffff; /* White for card background */
+        --primary-color: #11b5e4; /* Vibrant Cyan (Titles/Main Buttons) */
+        --text-color: #034748; /* Dark Teal (Body Text) */
+        --secondary-color: #0caadc; /* Medium Blue/Teal */
+        --accent-color: #1481ba; /* Rich Blue (Icons and Borders) */
+        --shadow-color: rgba(0, 0, 0, 0.15); /* Slightly stronger shadow for the main box */
+        --success-color: #28a745;
+        --error-color: #dc3545;
+    }
+
+    /* --- Base Styles --- */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    html, body {
+        height: 100%;
+        font-family: 'Poppins', sans-serif;
+        color: var(--text-color);
+    }
+
+    body {
+        background-color: var(--background-light);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 40px 20px;
+    }
+
+    /* --- Main Container --- */
+    .setup-container {
+        background-color: var(--panel-background);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px var(--shadow-color);
+        width: 90%;
+        max-width: 650px; /* Increased max-width for dual inputs */
+        padding: 30px;
+        transition: all 0.3s ease;
+    }
+    
+    /* --- Titles and Headings --- */
+    h2 { 
+        color: var(--primary-color); 
+        margin-top: 0; 
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+    .main-icon {
+        color: var(--accent-color);
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        margin-top: 10px;
+        display: block;
+        text-align: center;
+    }
+    .step-header {
+        color: var(--accent-color);
+        font-size: 1.3em;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 5px;
+        border-bottom: 2px solid #eee;
+    }
+    .small-text {
+        font-size: 0.9em;
+        color: #777;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    /* --- Form and Input Styles --- */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        grid-column: span 2; /* Default full width */
+    }
+    @media (min-width: 400px) {
+        .input-group.half-width {
+            grid-column: span 1;
+        }
+    }
+
+    /* New styles for the side-by-side topic/upload options */
+    .topic-upload-group {
+        display: flex;
+        align-items: flex-start; /* Align labels at the top */
+        grid-column: span 2;
+        gap: 15px;
+        position: relative;
+    }
+    .topic-upload-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0; /* Important for flex items */
+    }
+    .topic-upload-divider {
+        width: 2px;
+        background-color: #ddd; /* Light grey vertical line */
+        height: 100%;
+        min-height: 120px; /* Ensure divider is tall enough */
+        align-self: stretch; /* Make it take up the height of the container */
+        margin: 0 5px;
+        border-radius: 1px;
+    }
+    @media (max-width: 500px) {
+        /* Stack the topic/upload options on smaller screens */
+        .topic-upload-group {
+            flex-direction: column;
+        }
+        .topic-upload-divider {
+            display: none; /* Hide vertical divider */
+        }
+    }
+    /* End of new styles */
+
+    input[type="text"], input[type="email"], input[type="number"], textarea, input[type="file"] {
+        padding: 10px 15px;
+        box-sizing: border-box;
+        border: 2px solid var(--secondary-color);
+        border-radius: 8px;
+        font-size: 1em;
+        color: var(--text-color);
+        outline: none;
+        transition: border-color 0.3s, box-shadow 0.3s;
+        margin-top: 5px;
+        width: 100%;
+    }
+    input[type="file"] {
+        padding: 8px 15px; /* Adjust padding for file input */
+        line-height: normal; /* Fix alignment */
+    }
+    input:focus, textarea:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 5px rgba(17, 181, 228, 0.5);
+    }
+    textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+    label {
+        font-size: 0.9em;
+        color: var(--accent-color);
+        font-weight: 500;
+    }
+
+    /* --- Button Styles --- */
+    .btn {
+        display: block;
+        padding: 12px 25px;
+        cursor: pointer;
+        background: linear-gradient(45deg, var(--secondary-color) 0%, var(--primary-color) 100%); 
+        color: #ffffff; 
+        font-weight: 600;
+        border: none;
+        border-radius: 50px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: background 0.3s ease, transform 0.2s ease;
+        font-size: 1em;
+        width: 100%;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .btn:hover:not([disabled]) {
+        background: var(--accent-color); 
+        transform: translateY(-1px); 
+        box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+    }
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    .btn.back {
+        background: none;
+        border: 2px solid var(--accent-color);
+        color: var(--accent-color);
+        box-shadow: none;
+        margin-top: 10px;
+    }
+    .btn.back:hover {
+        background-color: var(--background-light);
+        transform: translateY(0);
+        box-shadow: none;
+    }
+
+    /* --- Back Link Styling --- */
+    .back-link {
+        margin-bottom: 20px;
+    }
+    .back-link a {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px; /* Slightly smaller gap */
+        text-decoration: none;
+        color: var(--accent-color);
+        font-weight: 600;
+        /* Smaller font size for discrete placement inside the card */
+        font-size: 0.9rem; 
+        padding: 6px 12px;
+        border-radius: 50px;
+        transition: background-color 0.3s, color 0.3s, transform 0.2s;
+        /* No background shadow needed as it's on a white card */
+        background-color: transparent;
+    }
+    
+    .back-link a:hover {
+        background-color: rgba(20, 129, 186, 0.1); /* Light blue background on hover */
+        color: var(--primary-color);
+        transform: scale(1.05);
+    }
+    
+    .back-link i {
+        font-size: 1.1rem;
+    }
+
+
+    /* --- Results/ID Display View --- */
+    .id-display {
+        text-align: center;
+        margin-top: 20px;
+        padding: 20px;
+        border: 2px solid var(--primary-color);
+        border-radius: 10px;
+        background-color: #e6f7ff;
+    }
+    .id-item {
+        margin-bottom: 25px;
+    }
+    .id-item label {
+        display: block;
+        font-size: 1.1em;
+        color: var(--accent-color);
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    .id-item .generated-id {
+        display: inline-block;
+        background-color: var(--panel-background);
+        padding: 8px 15px;
+        border-radius: 5px;
+        font-family: monospace;
+        font-size: 1.2em;
+        font-weight: 700;
+        color: var(--text-color);
+        border: 1px solid #ddd;
+        user-select: all; /* Allow easy selection/copy */
+    }
+    .copy-btn {
+        margin-left: 10px;
+        padding: 5px 10px;
+        background-color: var(--secondary-color);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        font-size: 0.9em;
+    }
+    .copy-btn:hover {
+        background-color: var(--primary-color);
+    }
+    
+    /* --- Loader Screen Styles (NEW) --- */
+    #step-loader {
+        text-align: center;
+        padding: 50px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .loader {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid var(--primary-color);
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .loader-text {
+        color: var(--accent-color);
+        font-weight: 600;
+        font-size: 1.1em;
+        margin-top: 10px;
+    }
+
+    /* --- View Management --- */
+    #step-1, #step-2, #step-loader, #step-3 { display: none; }
+    #step-1 { display: block; } /* Initial view */
+    
+    /* --- Footer Styling --- */
+    .footer {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: var(--text-color); /* Dark text for light background */
+        opacity: 0.6;
+        font-size: 0.8rem;
+        text-align: center;
+        z-index: 5;
+    }
+    /* Custom Notification (Toast) Styles */
+    #toast-notification {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: var(--success-color);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        z-index: 100;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        font-weight: 500;
+    }
+    #toast-notification.error {
+        background-color: var(--error-color);
+    }
+
+</style>
+</head>
+<body>
+
+<div id="toast-notification"></div>
+
+<div class="setup-container">
+    <div class="back-link">
+            <a href="javascript:void(0);" onclick="backStep()">
+                <i class="fas fa-arrow-left"></i> 
+                Back
+            </a>
+        </div>
+    <i class="fas fa-chalkboard-teacher main-icon"></i>
+    <h2>ADAM Quiz Creation</h2>
+    <div class="small-text">Step <span id="current-step-number">1</span> of 4</div>
+
+    <form id="setup-form" method="POST" action="{{ url_for('create_quiz') }}" enctype="multipart/form-data">
+
+        <div id="step-1" data-step="1">
+            <h3 class="step-header">1. Your Information</h3>
+            <div class="form-grid">
+                <div class="input-group half-width">
+                    <label for="teacher-fname">First Name</label>
+                    <input type="text" id="teacher-fname" name="teacher_fname" placeholder="e.g., Prof. Alex" required>
+                </div>
+                <div class="input-group half-width">
+                    <label for="teacher-lname">Last Name</label>
+                    <input type="text" id="teacher-lname" name="teacher_lname" placeholder="e.g., Johnson" required>
+                </div>
+                <div class="input-group">
+                    <label for="teacher-email">Email</label>
+                    <input type="email" id="teacher-email" name="teacher_email" placeholder="e.g., alex.johnson@university.edu" required>
+                </div>
+            </div>
+            <button type="button" class="btn" onclick="nextStep(2)">Next: Quiz Details <i class="fas fa-chevron-right"></i></button>
+        </div>
+        
+        <div id="step-2" data-step="2">
+            <h3 class="step-header">2. Quiz Details</h3>
+            <div class="form-grid">
+                <div class="input-group">
+                    <label for="quiz-title">Subject Name</label>
+                    <input type="text" id="quiz-title" name="subject_name" placeholder="e.g., Database Management" required>
+                </div>
+
+                <div class="topic-upload-group">
+                    <div class="topic-upload-item">
+                        <label for="quiz-upload"><i class="fas fa-file-upload"></i> Upload Document (PDF Only)</label>
+                        <input type="file" id="quiz-upload" name="quiz_document" accept=".pdf" />
+                    </div>
+                    <div class="topic-upload-divider"></div>
+                    <div class="topic-upload-item">
+                        <label for="quiz-topics"><i class="fas fa-list-ul"></i> Enter Topics (Comma Separated)</label>
+                        <textarea id="quiz-topics" name="quiz_topics" placeholder="e.g., 1NF, 2NF, BCNF, Relational Algebra"></textarea>
+                    </div>
+                </div>
+                <div class="input-group half-width">
+                    <label for="quiz-questions">Number of Questions</label>
+                    <input type="number" id="quiz-questions" name="quiz_questions" min="1" max="100" value="10" readonly>
+                </div>
+                <div class="input-group half-width">
+                    <label for="quiz-time">Time Limit per Question (seconds)</label>
+                    <input type="number" id="quiz-time" name="quiz_time" min="10" max="600" value="50" readonly>
+                </div>
+            </div>
+            <input type="hidden" id="timezone" name="timezone">
+            <button type="submit" class="btn">Generate & Create Quiz <i class="fas fa-check"></i></button>
+            <button type="button" class="btn back" onclick="nextStep(1)">Back: Your Info <i class="fas fa-chevron-left"></i></button>
+        </div>
+    </form>
+
+    <div id="step-loader" data-step="3">
+        <h3 class="step-header">3. Generating Assessment...</h3>
+        <div class="loader"></div>
+        <p class="loader-text">Analyzing content and creating your dynamic quiz. Please wait.</p>
+    </div>
+
+    <div id="step-3" data-step="4">
+        <h3 class="step-header">4. Setup Complete!</h3>
+        <p style="margin-bottom: 25px;">Please save the following IDs securely. You will need the <b>Teacher ID</b> to log in and the <b>Quiz ID</b> to distribute the assessment link to your students. Quiz and Teacher data will automatically deleted after <b>50 minutes</b>. </p>
+        
+        <div class="id-display">
+            <div class="id-item">
+                <label>Your Unique Teacher ID</label>
+                <span class="generated-id" id="teacher-id-display">TCH-RETURN-ID</span>
+                <button class="copy-btn" onclick="copyToClipboard('teacher-id-display', 'Teacher ID')"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+            
+            <div class="id-item">
+                <label>Generated Quiz ID</label>
+                <span class="generated-id" id="quiz-id-display">QZ-RETURN-ID</span>
+                <button class="copy-btn" onclick="copyToClipboard('quiz-id-display', 'Quiz ID')"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+        </div>
+
+        <a href="{{url_for('teacher_login')}}" class="btn secondary" style="margin-top: 30px;" onclick="showToast('This would navigate you to the login screen.', false)">
+            <i class="fas fa-sign-in-alt"></i> Proceed to Teacher Login
+        </a>
+        <button class="btn back" onclick="restartSetup()">Start New Quiz Setup <i class="fas fa-plus"></i></button>
+    </div>
+
+</div>
+<script>
+    document.getElementById("timezone").value =  Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+document.querySelector("#setup-form").addEventListener("submit", function () {
+  document.getElementById("timezone").value =
+    Intl.DateTimeFormat().resolvedOptions().timeZone;
+});
+
+
+    // --- STATE VARIABLES ---
+    let currentStep = 1;
+    
+    // --- DOM ELEMENTS ---
+    const stepViews = {
+        1: document.getElementById('step-1'),
+        2: document.getElementById('step-2'),
+        'loader': document.getElementById('step-loader'),
+        3: document.getElementById('step-3')
+    };
+    const currentStepNumber = document.getElementById('current-step-number');
+    const toast = document.getElementById('toast-notification');
+    const form = document.getElementById('setup-form');
+    
+    // Regex for basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // --- UTILITY FUNCTIONS ---
+
+    /** Shows a custom toast notification instead of alert() */
+    function showToast(message, isError = false) {
+        // Clear previous classes
+        toast.className = ''; 
+        toast.textContent = message;
+        
+        // Add error class if necessary
+        if (isError) {
+            toast.classList.add('error');
+        }
+
+        toast.style.display = 'block';
+        
+        // Use a slight delay for the transition to be visible
+        setTimeout(() => {
+            toast.style.opacity = '1';
+        }, 10);
+        
+        // Hide after 3 seconds
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 500); // Wait for fade-out before setting display: none
+        }, 3000);
+    }
+    
+    /** Generates a simple pseudo-unique ID (Used for simulation) */
+    function generateUniqueId(prefix) {
+        const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+        return `${prefix}-${Date.now().toString().slice(-5)}${randomPart}`;
+    }
+
+    /** Copies text from a DOM element to the clipboard */
+    function copyToClipboard(elementId, type) {
+        const textToCopy = document.getElementById(elementId).textContent;
+        const tempInput = document.createElement('textarea');
+        tempInput.value = textToCopy;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        
+        try {
+            document.execCommand('copy');
+            showToast(`${type} copied to clipboard!`);
+        } catch (err) {
+            showToast('Could not copy to clipboard. Please select and copy manually.', true);
+        }
+        document.body.removeChild(tempInput);
+    }
+
+    // --- VIEW MANAGEMENT FUNCTIONS ---
+
+    function changeStep(newStep) {
+        // Determine the actual step number for display (Loader is step 3, Final is step 4)
+        const stepNum = (newStep === 'loader' ? 3 : (newStep === 3 ? 4 : newStep));
+        
+        // Hide all views
+        Object.values(stepViews).forEach(view => {
+            view.style.display = 'none';
+        });
+        
+        // Show the target view
+        const targetView = (newStep === 'loader') ? stepViews.loader : stepViews[newStep];
+        targetView.style.display = 'block';
+
+        // Update step number display
+        currentStep = newStep;
+        currentStepNumber.textContent = stepNum;
+        
+        // Update the back link visibility based on the step
+        const backLink = document.querySelector('.back-link a');
+        if (currentStep === 1) {
+             // Link to teacher dashboard (uses Flask url_for)
+             backLink.href = '{{url_for("teacher")}}'; 
+        } else {
+             backLink.href = 'javascript:void(0);';
+        }
+    }
+
+    function validateStep1() {
+        const fname = document.getElementById('teacher-fname').value.trim();
+        const lname = document.getElementById('teacher-lname').value.trim();
+        const email = document.getElementById('teacher-email').value.trim();
+        
+        if (!fname || !lname || !email) {
+            showToast('Please fill in all teacher details.', true);
+            return false;
+        }
+        
+        // NEW: Email format validation
+        if (!emailRegex.test(email)) {
+            showToast('Please enter a valid email address (e.g., user@domain.com).', true);
+            return false;
+        }
+        return true;
+    }
+
+    function validateStep2() {
+        const title = document.getElementById('quiz-title').value.trim();
+        const uploadFile = document.getElementById('quiz-upload').files.length;
+        const topics = document.getElementById('quiz-topics').value.trim();
+
+        if (!title) {
+            showToast('Please provide a Quiz Subject Name.', true);
+            return false;
+        }
+
+        // NEW: Content Requirement - MUST have EITHER file upload OR topics entered
+        if (uploadFile === 0 && !topics) {
+            showToast('Please either **Upload a Document (PDF)** or **Enter Topics (Comma Separated)** to define the quiz content.', true);
+            return false;
+        }
+        return true;
+    }
+    
+    function backStep() {
+        if (currentStep === 2) {
+            changeStep(1);
+        } 
+        // Logic for currentStep 1 is handled by the back link's href="{{url_for('teacher')}}"
+    }
+
+    function nextStep(step) {
+        if (step === 2) {
+            if (!validateStep1()) return;
+        } 
+        // Note: nextStep(3) is now replaced by the form submission handler
+        changeStep(step);
+    }
+    
+    /** Handles the form submission (Step 2 -> Loader -> Step 3) */
+    form.addEventListener('submit', function(event) {
+        event.preventDefault(); // Stop default form submission
+        
+        if (!validateStep2()) {
+            return;
+        }
+
+        // 1. Show Loader Screen
+        changeStep('loader');
+        
+        // 2. Collect Data (FormData collects both files and text fields with 'name' attributes)
+        const formData = new FormData(form);
+        
+        // 3. Send Data to Flask Backend using Fetch API
+        const flaskTargetUrl = form.getAttribute('action'); 
+        
+        fetch(flaskTargetUrl, {
+            method: 'POST',
+            body: formData, // FormData handles text and files correctly
+        })
+        .then(response => {
+            if (!response.ok) {
+                // If the server returns an error status (e.g., 400 or 500)
+                // We attempt to read the error message if it's JSON, otherwise throw a generic error.
+                return response.json().catch(() => {
+                    throw new Error('Server returned an unexpected error.');
+                });
+            }
+            return response.json(); // Assuming Flask returns JSON
+        })
+        .then(data => {
+            if (data.success) {
+                // 4. Update Final Step View with real IDs from Flask
+                document.getElementById('teacher-id-display').textContent = data.teacher_id;
+                document.getElementById('quiz-id-display').textContent = data.quiz_id;
+                
+                // 5. Move to Final Step
+                changeStep(3); 
+                showToast('Quiz successfully created!', false);
+            } else {
+                // Handle application-level errors (e.g., validation failed in Flask)
+                changeStep(2); // Go back to quiz details
+                showToast(data.message || 'Quiz generation failed. Check your inputs.', true);
+            }
+        })
+        .catch(error => {
+            console.error('Submission Error:', error);
+            changeStep(2); // Go back to step 2 on network/fetch error
+            showToast('A network error occurred during creation. Please check your connection.', true);
+        });
+    });
+
+
+    function restartSetup() {
+        // Clear all inputs and reset state
+        document.getElementById('teacher-fname').value = '';
+        document.getElementById('teacher-lname').value = '';
+        document.getElementById('teacher-email').value = '';
+        document.getElementById('quiz-title').value = '';
+        document.getElementById('quiz-topics').value = '';
+        // Reset file input by setting value to empty string
+        document.getElementById('quiz-upload').value = ''; 
+        
+        changeStep(1);
+    }
+    
+    // Set the current year in the footer
+    function setFooterYear() {
+        const yearElement = document.getElementById('current-year');
+        if (yearElement) {
+            yearElement.textContent = new Date().getFullYear();
+        }
+    }
+
+
+    // --- INITIALIZATION ---
+    window.onload = () => {
+        changeStep(1); // Start on the first step
+        setFooterYear();
+    };
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+[project]
+name = "adam"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "dotenv>=0.9.9",
+    "flask>=3.1.2",
+    "langchain>=1.0.8",
+    "langchain-community>=0.4.1",
+    "openai>=2.8.1",
+    "pymupdf>=1.26.6",
+    "pytz>=2025.2",
+    "reportlab>=4.4.5",
+]

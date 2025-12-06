@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - ADAM: A Dynamic Assessment Module</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+    /* 🎨 Theme Colors (Consistent with Student Portal) */
+    :root {
+        --background-light: #f0f8ff; /* Alice Blue (Very Light Background) */
+        --panel-background: #ffffff; /* White for card background */
+        --primary-color: #11b5e4; /* Vibrant Cyan (Titles/Main Buttons) */
+        --text-color: #034748; /* Dark Teal (Body Text) */
+        --secondary-color: #0caadc; /* Medium Blue/Teal */
+        --accent-color: #1481ba; /* Rich Blue (Icons and Borders) */
+        --shadow-color: rgba(0, 0, 0, 0.15); /* Slightly stronger shadow for the main quiz box */
+        --success-color: #28a745;
+        --error-color: #dc3545;
+        --warning-color: #f39c12; /* Orange for warnings */
+    }
+
+    /* --- Base Styles --- */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    html, body {
+        height: 100%;
+        font-family: 'Poppins', sans-serif;
+        color: var(--text-color);
+    }
+
+    body {
+        min-height: 100vh;
+        background-color: var(--background-light);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+    }
+
+    /* --- Main Quiz Container --- */
+    .quiz-container {
+        background-color: var(--panel-background);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px var(--shadow-color);
+        width: 90%;
+        max-width: 700px;
+        padding: 30px;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    /* --- Back Link (Inside Card) --- */
+    .back-link {
+        position: absolute; 
+        top: 15px; 
+        left: 15px;
+        z-index: 20; 
+        /* Added display block here for easy visibility control in JS */
+        display: block; 
+    }
+
+    .back-link a {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px; 
+        text-decoration: none;
+        color: var(--accent-color);
+        font-weight: 600;
+        font-size: 0.9rem; 
+        padding: 6px 12px;
+        border-radius: 50px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+    
+    .back-link a:hover {
+        background-color: rgba(20, 129, 186, 0.1); 
+        color: var(--primary-color);
+    }
+
+    /* --- Timer Display (Fixed at Top of Container) --- */
+    #timer-display {
+        display: none; /* Only visible during quiz-view */
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: var(--success-color);
+        color: white;
+        padding: 8px 15px;
+        border-top-right-radius: 15px;
+        border-bottom-left-radius: 15px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+    #timer-display.low-time {
+        background-color: var(--error-color); /* Red/Error color for low time */
+    }
+
+
+    /* --- Titles and Headings --- */
+    h2 { 
+        color: var(--primary-color); 
+        margin-top: 0; 
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+    .main-icon {
+        color: var(--accent-color);
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        margin-top: 10px;
+    }
+    .section-title {
+        color: var(--text-color);
+        font-weight: 600;
+        margin-bottom: 5px;
+        font-size: 1.1rem;
+    }
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px dashed #eee;
+    }
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+    .detail-value {
+        font-weight: 600;
+        color: var(--accent-color);
+    }
+    
+    /* --- Form and Input Styles --- */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        grid-column: span 2; /* Default full width */
+    }
+    @media (min-width: 500px) {
+        .input-group.half-width {
+            grid-column: span 1;
+        }
+    }
+
+    input[type="text"], input[type="number"] {
+        padding: 10px 15px;
+        box-sizing: border-box;
+        border: 2px solid var(--secondary-color);
+        border-radius: 8px;
+        font-size: 1em;
+        color: var(--text-color);
+        outline: none;
+        transition: border-color 0.3s, box-shadow 0.3s;
+        margin-top: 5px;
+    }
+    input[type="text"]:focus, input[type="number"]:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 5px rgba(17, 181, 228, 0.5);
+    }
+    label {
+        font-size: 0.9em;
+        color: var(--accent-color);
+        font-weight: 500;
+    }
+
+    /* --- Button Styles (Themed Gradient) --- */
+    .btn {
+        display: block;
+        padding: 12px 25px;
+        cursor: pointer;
+        /* Gradient from Medium Blue/Teal to Vibrant Cyan */
+        background: linear-gradient(45deg, var(--secondary-color) 0%, var(--primary-color) 100%); 
+        color: #ffffff; 
+        font-weight: 600;
+        border: none;
+        border-radius: 50px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: background 0.3s ease, transform 0.2s ease;
+        font-size: 1em;
+        width: 100%;
+        text-align: center;
+    }
+
+    .btn:hover:not([disabled]) {
+        background: var(--accent-color); 
+        transform: translateY(-1px); 
+        box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+    }
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    .btn.secondary {
+        background: var(--accent-color);
+        margin-top: 15px;
+    }
+    .btn.outline {
+        background: none;
+        border: 2px solid var(--accent-color);
+        color: var(--accent-color);
+        box-shadow: none;
+        margin-top: 10px;
+    }
+    .btn.outline:hover:not([disabled]) {
+        background-color: var(--background-light);
+        transform: translateY(0);
+        box-shadow: none;
+    }
+
+    /* --- Instructions Specific Styles --- */
+    .instruction-section {
+        margin-bottom: 25px;
+    }
+    .instruction-section h3 {
+        font-size: 1.2rem;
+        color: var(--accent-color);
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .instruction-section ul {
+        list-style-type: none;
+        padding-left: 0;
+        font-size: 0.95em;
+    }
+    .instruction-section li {
+        margin-bottom: 8px;
+        padding-left: 18px;
+        position: relative;
+    }
+    .instruction-section li i.fa-circle-dot {
+        position: absolute;
+        left: 0;
+        top: 5px;
+        font-size: 0.6em;
+        color: var(--secondary-color);
+    }
+    .integrity-warning {
+        padding: 15px;
+        border: 2px solid var(--error-color);
+        border-radius: 8px;
+        background-color: #fffafa; /* Light red background */
+        color: var(--text-color);
+        font-weight: 500;
+        margin-top: 15px;
+    }
+    .integrity-warning h4 {
+        color: var(--error-color);
+        margin-top: 0;
+        font-weight: 700;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+    
+    /* --- Quiz Styles --- */
+    .progress { 
+        color: var(--accent-color); 
+        font-size: 0.9em; 
+        margin-bottom: 20px; 
+        font-weight: 600;
+        text-align: right;
+    }
+    .question-text { 
+        font-size: 1.2em; 
+        color: var(--text-color); 
+        margin-bottom: 25px; 
+        line-height: 1.5; 
+        font-weight: 500;
+    }
+    .options-list { 
+        list-style-type: none; 
+        padding: 0; 
+    }
+    .option-btn {
+        background-color: #f7f7f7;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 12px;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 1em;
+        line-height: 1.4;
+        font-weight: 400;
+        color: var(--text-color);
+    }
+    .option-btn:hover:not([disabled]) { 
+        background-color: var(--background-light); 
+        border-color: var(--primary-color); 
+    }
+    /* Feedback Colors */
+    .option-btn.correct { background-color: #e6ffed; border-color: var(--success-color); color: #155724; }
+    .option-btn.incorrect { background-color: #fff0f0; border-color: var(--error-color); color: #721c24; }
+    
+    .feedback {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 10px;
+        background-color: #f8f9fa;
+        border-left: 5px solid var(--primary-color);
+        display: none;
+    }
+    .feedback strong {
+        color: var(--primary-color);
+    }
+    
+    .next-btn-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 20px;
+    }
+
+    /* --- Results View --- */
+    .score-display { 
+        font-size: 3em; 
+        font-weight: 700; 
+        color: var(--success-color); 
+        margin: 20px 0; 
+        animation: pulse 1s infinite alternate;
+    }
+    .time-taken {
+        color: var(--accent-color);
+        font-size: 1.2em;
+        margin-bottom: 30px;
+    }
+
+    /* --- View Management (Only one view is active at a time) --- */
+    #details-view, #instructions-view, #student-view, #quiz-view, #results-view { display: none; }
+    #details-view { display: block; } /* Initial view */
+
+    /* --- Custom Notification (Toast) Styles --- */
+    #toast-notification {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: var(--error-color);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        z-index: 100;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        font-weight: 500;
+    }
+
+    @keyframes pulse {
+        from { transform: scale(1); opacity: 1; }
+        to { transform: scale(1.05); opacity: 0.8; }
+    }
+
+    @media (max-width: 800px) {
+    #instructions-view {
+        margin-top: 35vh; 
+    }
+   
+}
+
+
+</style>
+</head>
+<body>
+
+<div id="timer-display" style="z-index: 999;">
+    <i class="fas fa-hourglass-half"></i> <span id="time-remaining">00:50</span>
+</div>
+
+<div class="quiz-container">
+    
+    <div id="details-view">
+        <!-- <i class="fas fa-file-invoice main-icon"></i> -->
+        <h2>Quiz Details</h2>
+        <div class="detail-item">
+            <span class="section-title">Quiz Name:</span>
+            <span class="detail-value">{{data['subject']}}</span>
+        </div>
+        <div class="detail-item">
+            <span class="section-title">Quiz ID:</span>
+            <span class="detail-value">{{data['id']}}</span>
+        </div>
+        <div class="detail-item">
+            <span class="section-title">Total Questions:</span>
+            <span class="detail-value" id="q-count">10</span>
+        </div>
+        <div class="detail-item">
+            <span class="section-title">Time Limit:</span>
+            <span class="detail-value">50 seconds per question</span>
+        </div>
+        
+        <button class="btn" onclick="showInstructions()" style="margin-top: 30px;">Proceed to Instructions</button>
+    </div>
+    
+    <div id="instructions-view">
+        <!-- <i class="fas fa-scroll main-icon"></i> -->
+        <h2>Assessment Instructions</h2>
+        
+        <div class="instruction-section">
+            <h3><i class="fas fa-clock"></i> Timing & Flow</h3>
+            <ul>
+                <li><i class="fas fa-circle-dot"></i> You have <b>50 seconds</b> to answer each question.</li>
+                <li><i class="fas fa-circle-dot"></i> Once the timer expires, the question is marked as <b>unanswered/incorrect</b>, and you automatically proceed.</li>
+                <li><i class="fas fa-circle-dot"></i> You cannot go back to previous questions.</li>
+            </ul>
+        </div>
+
+        <div class="instruction-section">
+            <h3><i class="fas fa-mouse-pointer"></i> Answering Questions</h3>
+            <ul>
+                <li><i class="fas fa-circle-dot"></i> Click on your chosen option. Once selected, your answer is <b>final</b> and cannot be changed.</li>
+                <li><i class="fas fa-circle-dot"></i> Only one answer can be selected per question.</li>
+            </ul>
+        </div>
+
+        <div class="integrity-warning">
+            <h4><i class="fas fa-triangle-exclamation"></i> ACADEMIC INTEGRITY POLICY</h4>
+            <p style="margin-bottom: 5px;">
+                <b>DO NOT</b> switch away from this browser tab, minimize the window, or reload the page once the quiz begins.
+            </p>
+            <p>
+                <b>INSTANT PENALTY:</b> If a tab switch or navigation attempt is detected, the timer for the question you are currently viewing will <b>instantly expire</b>, resulting in a zero score for that specific question.
+            </p>
+        </div>
+
+        <button class="btn" onclick="showStudentInput()" style="margin-top: 30px;">
+            I Understand. Start Registration <i class="fas fa-chevron-right"></i>
+        </button>
+        <button class="btn outline" onclick="showDetails()">Go Back</button>
+    </div>
+
+
+    <div id="student-view">
+        <h2>Enter Student Information</h2>
+        
+        <div class="form-grid">
+            <div class="input-group half-width">
+                <label for="fname-input">First Name</label>
+                <input type="text" id="fname-input" placeholder="e.g., Jane" required>
+            </div>
+            <div class="input-group half-width">
+                <label for="lname-input">Last Name</label>
+                <input type="text" id="lname-input" placeholder="e.g., Doe" required>
+            </div>
+            <div class="input-group">
+                <label for="student-id-input">Student ID</label>
+                <input type="text" id="student-id-input" placeholder="e.g., S123456" required>
+            </div>
+        </div>
+        
+        <button class="btn" onclick="startQuiz()">Start Assessment</button>
+        <button class="btn outline" onclick="showInstructions()">Go Back</button>
+    </div>
+
+
+    <div id="quiz-view">
+        <div class="progress" id="progress">Question 1 of 10</div>
+        <div class="question-text" id="question-text">Loading...</div>
+        <div class="options-list" id="options-list"></div>
+        <div class="feedback" id="feedback"></div>
+        <div class="next-btn-container">
+            <button class="btn" id="next-btn" onclick="nextQuestion()" style="display:none; width: 200px;">Next Question <i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+
+    <div id="results-view" style="text-align: center;">
+            <form id="quiz-results-form" method="POST" action="{{url_for('quiz')}}"> 
+        <i class="fas fa-trophy" class="main-icon" style="color: var(--success-color);"></i>
+        <h2>Assessment Completed!</h2>
+        <p id="student-greeting" style="font-size: 1.1em; font-weight: 500;"></p>
+        
+        <div class="score-display" id="final-score">0 / 10</div>
+        <div class="time-taken" id="time-taken">Total time spent: 0 min 0 sec</div>
+        
+        <input type="hidden" name="student_id" id="stID-hidden">
+        <input type="hidden" name="student_name" id="stName-hidden">
+        <input type="hidden" name="total_marks" id="totalMarks-hidden">
+        <input type="hidden" name="obtained_marks" id="obtainedMarks-hidden">
+        <input type="hidden" name="classdb" id="classDb-hidden">
+        <input type="hidden" name="submission_type" id="submission-type-hidden"> 
+        
+        <button class="btn" id="submit-results-btn" type="submit" style="margin-top: 20px; display: none;">
+            <i class="fas fa-save"></i> Save Results and Continue
+        </button> 
+    </form>
+    </div>
+</div>
+
+<div id="toast-notification"></div>
+
+<script>
+    // --- DATA: Quiz Questions ---
+    const quizData = {{data['quizJSON'] | tojson}};
+
+    // --- STATE VARIABLES ---
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let studentInfo = {};
+    let timerInterval = null;
+    let questionTimeLimitSeconds = 50; 
+    let currentQuestionTime = questionTimeLimitSeconds;
+    let totalTimeSpentSeconds = 0; 
+    let isQuizActive = false;
+    let allowNavigation = false;
+    let quizTerminated = false;
+
+    // --- DOM ELEMENTS ---
+    const views = {
+        details: document.getElementById('details-view'),
+        instructions: document.getElementById('instructions-view'),
+        student: document.getElementById('student-view'),
+        quiz: document.getElementById('quiz-view'),
+        results: document.getElementById('results-view')
+    };
+    const timerDisplay = document.getElementById('timer-display');
+    const timeRemainingSpan = document.getElementById('time-remaining');
+    const questionCountSpan = document.getElementById('q-count');
+    const backLinkElement = document.getElementById('back-to-portal-link');
+
+    // Student Inputs
+    const fNameInput = document.getElementById('fname-input');
+    const lNameInput = document.getElementById('lname-input');
+    const studentIdInput = document.getElementById('student-id-input');
+
+    // Quiz Elements
+    const questionText = document.getElementById('question-text');
+    const optionsList = document.getElementById('options-list');
+    const feedbackDiv = document.getElementById('feedback');
+    const nextBtn = document.getElementById('next-btn');
+    const progressDiv = document.getElementById('progress');
+
+    // Results Elements
+    const finalScore = document.getElementById('final-score');
+    const greeting = document.getElementById('student-greeting');
+    const timeTakenSpan = document.getElementById('time-taken');
+    const toast = document.getElementById('toast-notification');
+
+    /** Helper: Get CSS variable values */
+    function getCssVar(name) {
+        return getComputedStyle(document.body).getPropertyValue(name).trim();
+    }
+
+    // --- UTILITY FUNCTIONS ---
+
+  
+
+    function showToast(message) {
+        toast.textContent = message;
+        toast.style.display = 'block';
+        toast.style.backgroundColor = getCssVar('--error-color');
+        setTimeout(() => { toast.style.opacity = '1'; }, 10);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => { toast.style.display = 'none'; }, 500);
+        }, 3000);
+    }
+
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function changeView(activeViewId) {
+        Object.values(views).forEach(view => {
+            view.style.display = 'none';
+        });
+        views[activeViewId].style.display = 'block';
+
+        isQuizActive = (activeViewId === 'quiz');
+        timerDisplay.style.display = isQuizActive ? 'block' : 'none';
+
+        if (backLinkElement) {
+            backLinkElement.style.display = (activeViewId === 'quiz') ? 'none' : 'block';
+        }
+    }
+
+    // --- BEACON SUBMISSION ---
+    function silentSubmit() {
+        if (isQuizActive) {
+            stopTimer();
+            isQuizActive = false;
+
+            const studentName = `${studentInfo.fName || ''} ${studentInfo.lName || ''}`;
+            const studentID = studentInfo.studentId || "N/A";
+            const totalMarks = quizData.length;
+            const obtainedMarks = score;
+            const classDb = "{{data['classDB']}}";
+
+            const data = new FormData();
+            data.append('student_id', studentID);
+            data.append('student_name', studentName);
+            data.append('total_marks', totalMarks);
+            data.append('obtained_marks', obtainedMarks);
+            data.append('classdb', classDb);
+            data.append('submission_type', 'abandoned');
+
+            navigator.sendBeacon("{{url_for('quiz')}}", data);
+        }
+    }
+
+    // --- VIEW LOGIC ---
+
+    function showInstructions() {
+    changeView('instructions');
+}
+
+    function showDetails() {
+        questionCountSpan.textContent = quizData.length;
+        changeView('details');
+    }
+
+    function showStudentInput() {
+        changeView('student');
+    }
+
+    function startQuiz() {
+        const fName = fNameInput.value.trim();
+        const lName = lNameInput.value.trim();
+        const studentId = studentIdInput.value.trim();
+
+        if (!fName || !lName || !studentId) {
+            showToast("Please fill in all student details to start the assessment.");
+            return;
+        }
+
+        studentInfo = { fName, lName, studentId };
+        currentQuestionIndex = 0;
+        score = 0;
+        totalTimeSpentSeconds = 0;
+        allowNavigation = false;
+
+        changeView('quiz');
+        loadQuestion();
+    }
+
+    function startTimer() {
+        stopTimer();
+        currentQuestionTime = questionTimeLimitSeconds;
+        timeRemainingSpan.textContent = formatTime(currentQuestionTime);
+        timerDisplay.classList.remove('low-time');
+        timerDisplay.style.backgroundColor = getCssVar('--success-color');
+
+        timerInterval = setInterval(() => {
+            currentQuestionTime--;
+            totalTimeSpentSeconds++;
+
+            if (currentQuestionTime < 0) {
+                stopTimer();
+                checkAnswer(null, null, true);
+                showToast(`Time expired for Question ${currentQuestionIndex + 1}.`);
+                return;
+            }
+
+            timeRemainingSpan.textContent = `00:${currentQuestionTime.toString().padStart(2, '0')}`;
+
+            if (currentQuestionTime <= 10) {
+                timerDisplay.classList.add('low-time');
+                timerDisplay.style.backgroundColor = getCssVar('--error-color');
+            } else {
+                timerDisplay.classList.remove('low-time');
+                timerDisplay.style.backgroundColor = getCssVar('--success-color');
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+    }
+
+    function loadQuestion() {
+        const currentData = quizData[currentQuestionIndex];
+        progressDiv.innerText = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
+        questionText.innerHTML = currentData.question;
+
+        optionsList.innerHTML = '';
+        feedbackDiv.style.display = 'none';
+        nextBtn.style.display = 'none';
+
+        currentData.answered = false;
+        currentData.timeTaken = 0;
+
+        currentData.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            const prefix = String.fromCharCode(65 + index);
+            btn.innerHTML = `<span style="font-weight: 700; margin-right: 10px; color: ${getCssVar('--accent-color')};">${prefix}.</span> ${opt.text}`;
+            btn.onclick = () => checkAnswer(index, btn, false);
+            optionsList.appendChild(btn);
+        });
+
+        startTimer();
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < quizData.length) {
+            loadQuestion();
+        } else {
+            finishQuiz();
+        }
+    }
+
+    function checkAnswer(selectedIndex, btnElement, isTimeout) {
+        stopTimer();
+        const currentData = quizData[currentQuestionIndex];
+        currentData.timeTaken = questionTimeLimitSeconds - (isTimeout ? 0 : currentQuestionTime);
+
+        const allBtns = document.querySelectorAll('.option-btn');
+        allBtns.forEach(b => b.disabled = true);
+        currentData.answered = true;
+
+        if (isTimeout) {
+            currentData.studentChoice = -1;
+            feedbackDiv.innerHTML = `<strong>Time Out!</strong> You did not answer in time.`;
+            allBtns.forEach(b => b.classList.add('incorrect'));
+        } else {
+            const selectedOption = currentData.options[selectedIndex];
+            currentData.studentChoice = selectedIndex;
+
+            if (selectedOption.correct) {
+                btnElement.classList.add('correct');
+                score++;
+                feedbackDiv.innerHTML = `<strong>Correct!</strong> ${selectedOption.rationale}`;
+            } else {
+                btnElement.classList.add('incorrect');
+                currentData.options.forEach((opt, idx) => {
+                    if (opt.correct) allBtns[idx].classList.add('correct');
+                });
+                feedbackDiv.innerHTML = `<strong>Incorrect.</strong> Rationale: ${selectedOption.rationale}`;
+            }
+        }
+
+        feedbackDiv.style.display = 'block';
+
+        if (currentQuestionIndex < quizData.length - 1) {
+            nextBtn.textContent = 'Next Question ';
+            nextBtn.innerHTML += '<i class="fas fa-chevron-right"></i>';
+        } else {
+            nextBtn.textContent = 'Finish Assessment ';
+            nextBtn.innerHTML += '<i class="fas fa-check-circle"></i>';
+        }
+        nextBtn.style.display = 'block';
+    }
+
+    function finishQuiz() {
+        stopTimer();
+        isQuizActive = false;
+        allowNavigation = true;
+
+        changeView('results');
+
+        const fName = studentInfo.fName || 'Student';
+        const totalTime = formatTime(totalTimeSpentSeconds);
+        const totalQuestions = quizData.length;
+
+        greeting.innerText = `Thank you for completing the assessment, ${fName} ${studentInfo.lName || ''}!`;
+        finalScore.innerText = `${score} / ${totalQuestions}`;
+        
+        // Visual color logic
+        const passed = score > (totalQuestions / 2);
+        finalScore.style.color = passed ? getCssVar('--success-color') : getCssVar('--error-color');
+        
+        timeTakenSpan.innerText = `Total time spent: ${totalTime}`;
+        timeTakenSpan.style.color = getCssVar('--accent-color');
+
+        // Populate Hidden Form
+        document.getElementById('stID-hidden').value = studentInfo.studentId;
+        document.getElementById('stName-hidden').value = `${studentInfo.fName} ${studentInfo.lName}`;
+        document.getElementById('totalMarks-hidden').value = totalQuestions;
+        document.getElementById('obtainedMarks-hidden').value = score;
+        document.getElementById('classDb-hidden').value = "{{data['classDB']}}";
+
+        setTimeout(() => {
+            console.log("Data ready. Auto-generating PDF...");
+            downloadReport();
+            // auto-submit to server after PDF:
+            document.getElementById('quiz-results-form').submit();
+        }, 500);
+    }
+
+    // --- REVISED BEAUTIFUL REPORT GENERATION ---
+
+    function downloadReport() {
+        if (typeof window.jspdf === 'undefined') {
+            showToast('PDF library loading...');
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+        
+        // Colors
+        const colPrimary = [44, 62, 80];   // Dark Blue
+        const colAccent = [52, 152, 219];  // Light Blue
+        const colSuccess = [39, 174, 96];  // Green
+        const colError = [192, 57, 43];    // Red
+        const colLight = [236, 240, 241];  // Light Gray
+
+        const margin = 15;
+        const pageHeight = pdf.internal.pageSize.height;
+        const pageWidth = pdf.internal.pageSize.width;
+        let y = 0;
+
+        // 1. HEADER BANNER
+        pdf.setFillColor(...colPrimary);
+        pdf.rect(0, 0, pageWidth, 40, 'F');
+
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(22);
+        pdf.setFont("helvetica", "bold");
+        pdf.text("ASSESSMENT REPORT", margin, 20);
+        
+        pdf.setFontSize(10);
+        pdf.setFont("helvetica", "normal");
+        pdf.text("ADAM: A Dynamic Assessment Module", margin, 28);
+        
+        pdf.text(`Date: ${new Date().toLocaleDateString()}`, pageWidth - margin, 20, { align: "right" });
+        pdf.text(`Time: ${new Date().toLocaleTimeString()}`, pageWidth - margin, 28, { align: "right" });
+
+        y = 55;
+
+        // 2. STUDENT DETAILS & SCORE CARD
+        // Left Column: Student Info
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(12);
+        pdf.setFont("helvetica", "bold");
+        pdf.text("STUDENT DETAILS", margin, y);
+        
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(11);
+        y += 7;
+        pdf.text(`Name: ${studentInfo.fName} ${studentInfo.lName}`, margin, y);
+        y += 6;
+        pdf.text(`ID: ${studentInfo.studentId}`, margin, y);
+        y += 6;
+        pdf.text(`Duration: ${formatTime(totalTimeSpentSeconds)}`, margin, y);
+
+        // Right Column: Score Box
+        const percentage = ((score / quizData.length) * 100).toFixed(0);
+        const passed = percentage >= 50;
+        const badgeColor = passed ? colSuccess : colError;
+        
+        // Draw Score Circle/Box
+        const scoreBoxX = pageWidth - 60;
+        const scoreBoxY = 50;
+        pdf.setDrawColor(...badgeColor);
+        pdf.setLineWidth(1);
+        pdf.setFillColor(255, 255, 255);
+        pdf.roundedRect(scoreBoxX, scoreBoxY, 45, 25, 3, 3, 'FD');
+
+        pdf.setFontSize(16);
+        pdf.setTextColor(...badgeColor);
+        pdf.setFont("helvetica", "bold");
+        pdf.text(`${percentage}%`, scoreBoxX + 22.5, scoreBoxY + 10, { align: "center" });
+        
+        pdf.setFontSize(9);
+        pdf.setTextColor(100, 100, 100);
+        pdf.text(`${score} / ${quizData.length} Correct`, scoreBoxX + 22.5, scoreBoxY + 18, { align: "center" });
+
+        y = 90; // Start questions below summary
+
+        // 3. DETAILED BREAKDOWN
+        pdf.setFontSize(12);
+        pdf.setTextColor(...colPrimary);
+        pdf.setFont("helvetica", "bold");
+        pdf.text("DETAILED BREAKDOWN", margin, y);
+        
+        // Line separator
+        pdf.setDrawColor(200, 200, 200);
+        pdf.line(margin, y + 2, pageWidth - margin, y + 2);
+        y += 10;
+
+        // Loop through questions
+        quizData.forEach((q, index) => {
+            const questionTextStr = `Q${index + 1}: ${q.question.replace(/<[^>]*>?/gm, '')}`; // Strip HTML tags roughly
+            
+            // Logic for status
+            let statusText = "NO RESPONSE";
+            let statusColor = [100, 100, 100];
+            let userChoiceText = "N/A";
+
+            if (q.studentChoice !== undefined && q.studentChoice !== -1) {
+                const isCorrect = q.options[q.studentChoice].correct;
+                statusText = isCorrect ? "CORRECT" : "INCORRECT";
+                statusColor = isCorrect ? colSuccess : colError;
+                userChoiceText = q.options[q.studentChoice].text;
+            } else if (q.studentChoice === -1) {
+                statusText = "TIMEOUT";
+                statusColor = colError;
+                userChoiceText = "No answer submitted";
+            }
+
+            // Text Wrapping
+            pdf.setFontSize(10);
+            pdf.setFont("helvetica", "bold");
+            const splitQuestion = pdf.splitTextToSize(questionTextStr, pageWidth - (margin * 2) - 10);
+            const qHeight = splitQuestion.length * 5;
+            const blockHeight = qHeight + 20; // + padding for answer and status
+
+            // Page Break Check
+            if (y + blockHeight > pageHeight - 15) {
+                pdf.addPage();
+                y = 20; // Reset Y on new page
+            }
+
+            // Draw Background Box for Question
+            pdf.setFillColor(...colLight);
+            pdf.rect(margin, y, pageWidth - (margin * 2), blockHeight, 'F');
+
+            // Write Question
+            pdf.setTextColor(0, 0, 0);
+            pdf.text(splitQuestion, margin + 5, y + 6);
+
+            // Write Status
+            const statusY = y + qHeight + 8;
+            pdf.setFontSize(9);
+            pdf.setTextColor(...statusColor);
+            pdf.setFont("helvetica", "bold");
+            pdf.text(statusText, margin + 5, statusY);
+
+            // Write Answer
+            pdf.setTextColor(80, 80, 80);
+            pdf.setFont("helvetica", "normal");
+            const cleanAnswer = userChoiceText.replace(/<[^>]*>?/gm, ''); // clean html
+            // Truncate answer if too long for one line
+            const displayAnswer = cleanAnswer.length > 70 ? cleanAnswer.substring(0, 70) + "..." : cleanAnswer;
+            pdf.text(`You chose: ${displayAnswer}`, margin + 35, statusY);
+
+            y += blockHeight + 5; // Spacing between cards
+        });
+
+        // Save
+        const filename = `Report_${studentInfo.fName}_${studentInfo.lName}.pdf`;
+        pdf.save(filename);
+    }
+
+    function restartQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        studentInfo = {};
+        totalTimeSpentSeconds = 0;
+        isQuizActive = false;
+        stopTimer();
+        
+        fNameInput.value = '';
+        lNameInput.value = '';
+        studentIdInput.value = '';
+
+        showDetails();
+    }
+
+    // --- NEW HANDLER FUNCTION ---
+// --- MODIFIED HANDLER FUNCTION (Immediate Penalty) ---
+function handleVisibilityChange() {
+    // Only proceed if the quiz is active and the document is hidden (tab switch)
+    if (isQuizActive && document.hidden) {
+        
+        console.warn("Tab switch detected. Forcing current question timeout.");
+            
+        // 1. Ensure timer is stopped
+        stopTimer(); 
+        
+        // 2. Immediately call checkAnswer() with the isTimeout flag set to true.
+        //    This marks the question as a timeout/unanswered and advances to the next question.
+        checkAnswer(null, null, true); 
+        
+        // 3. Show a notification of the penalty
+        showToast("Current question expired instantly due to tab switch.");
+        
+        // NOTE: Since the question advances via checkAnswer(), the student will immediately 
+        // start the timer on the next question when they return to the quiz tab.
+    }
+}
+
+    // --- BROWSER NAVIGATION HANDLERS ---
+    window.onbeforeunload = function(event) {
+        if (isQuizActive && !allowNavigation) {
+            event.preventDefault();
+            event.returnValue = 'Quiz running. Exit?';
+            return event.returnValue;
+        }
+    };
+    window.addEventListener('unload', silentSubmit);
+    window.addEventListener('pagehide', silentSubmit);
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    // --- INIT ---
+    window.onload = () => {
+        showDetails();
+    };
+</script>
+
+
+    </body>
+    </html>

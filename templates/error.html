@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADAM: Error Occurred</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    /* 🎨 Color Palette: Custom Light Blue/Teal/Cyan Theme (STRICTLY ADHERED) */
+    :root {
+        --background-light: #f0f8ff; /* Alice Blue */
+        --panel-background: #ffffff; /* White for card background */
+        --primary-color: #11b5e4; /* Vibrant Cyan */
+        --text-color: #034748; /* Dark Teal */
+        --secondary-color: #0caadc; /* Medium Blue/Teal */
+        --accent-color: #1481ba; /* Rich Blue */
+        --error-red: #e41142; /* A strong red for key warning icon/status indicator */
+        --shadow-color: rgba(0, 0, 0, 0.15); 
+    }
+
+    /* --- Base Styles and Centering --- */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    html, body {
+        height: 100%;
+        font-family: 'Poppins', sans-serif;
+        color: var(--text-color);
+    }
+
+    body {
+        min-height: 100vh;
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: var(--background-light); 
+        position: relative; 
+        padding: 40px 20px 70px 20px;
+        justify-content: center;
+        overflow: hidden;
+    }
+    
+    /* --- Animated Icon Background Container & Animation (UNMODIFIED) --- */
+    .animated-doodles {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;
+    }
+
+    .floating-icon {
+        position: absolute; display: block; color: var(--secondary-color); opacity: 0.08; text-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+    }
+    
+    @keyframes float-up {
+        0% { transform: translateY(0) rotate(0deg); opacity: 0.08; }
+        50% { opacity: 0.12; }
+        100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+    }
+    /* ------------------------------------------------------------------- */
+
+
+    /* --- Title Area --- */
+    .page-title-container {
+        margin-bottom: 30px; text-align: center; z-index: 10; padding: 10px; max-width: 900px; width: 90%;
+    }
+    
+    .page-title {
+        font-size: 2.5rem;
+        color: var(--accent-color); /* Rich Blue for a less jarring title */
+        font-weight: 700;
+    }
+    
+    .page-title span {
+        font-weight: 400; display: block; font-size: 1.2rem; color: var(--primary-color); margin-top: 5px;
+    }
+
+    /* --- Main Container Layout (Enhanced with Gradient Border) --- */
+    .main-container {
+        display: flex;
+        justify-content: center; /* Center the card inside */
+        padding: 20px;
+        max-width: 650px; 
+        width: 90%;
+        background-color: var(--panel-background);
+        border-radius: 20px;
+        /* box-shadow: 0 20px 50px var(--shadow-color);  */
+        z-index: 10;
+        
+        /* Attractive Gradient Border Effect */
+        padding: 3px; /* Creates the space for the border */
+        background-clip: padding-box;
+        /* border: 4px solid transparent; Acts as a fallback */
+        border-image: linear-gradient(45deg, var(--primary-color), var(--secondary-color), var(--primary-color)) 1; 
+        transition: transform 0.3s ease;
+    }
+
+    .main-container:hover {
+        transform: scale(1.01);
+    }
+    
+    /* --- Error Content Styling (Enhanced) --- */
+    .error-card {
+        padding: 25px 5px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        background-color: var(--panel-background); /* Ensures white background inside the border */
+        border-radius: 25px; /* Matches outer radius minus padding */
+    }
+    
+    /* Keyframes for Pulsating Icon */
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 0.9; }
+        50% { transform: scale(1.1); opacity: 1; }
+        100% { transform: scale(1); opacity: 0.9; }
+    }
+
+    .error-icon {
+        font-size: 5.5rem;
+        color: var(--error-red); /* Use the warning color for high contrast */
+        margin-bottom: 25px;
+        animation: pulse 2s infinite ease-in-out;
+        text-shadow: 0 0 15px rgba(228, 17, 66, 0.4);
+    }
+    
+    .error-code {
+        font-size: 5rem;
+        font-weight: 800;
+        /* Using the vibrant primary color for consistency */
+        color: var(--primary-color); 
+        margin-bottom: 5px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .error-message {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-bottom: 15px;
+        text-transform: uppercase;
+    }
+    
+    .error-details {
+        font-size: 1rem;
+        color: var(--text-color);
+        opacity: 0.7;
+        max-width: 450px;
+        margin-bottom: 30px;
+    }
+
+    /* --- Link Button Styling (Enhanced Shadow) --- */
+    .error-link a {
+        display: inline-block;
+        padding: 12px 30px; /* Slightly larger padding */
+        margin-top: 15px;
+        background: linear-gradient(45deg, var(--secondary-color) 0%, var(--primary-color) 100%); 
+        color: #ffffff;
+        text-decoration: none;
+        font-weight: 600;
+        border-radius: 50px;
+        border: none; /* Removed accent border for cleaner look */
+        /* box-shadow: 0 6px 20px rgba(17, 181, 228, 0.4); Shadow using primary color */
+        transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .error-link a:hover {
+        background: white; 
+        color: var(--accent-color); 
+        border: 2px solid var(--accent-color); /* Added border on hover */
+        /* box-shadow: 0 10px 25px rgba(20, 129, 186, 0.2); Softer shadow on hover */
+        transform: translateY(-3px) scale(1.05); 
+    }
+    
+    /* --- Footer Styling --- */
+    .footer {
+        position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: var(--text-color); opacity: 0.6; font-size: 0.8rem; text-align: center; z-index: 5;
+    }
+
+    /* --- Responsive Adjustments --- */
+    @media (max-width: 800px) {
+        .page-title { font-size: 1.8rem; }
+        .main-container { padding: 10px; }
+        .error-card { padding: 10px 5px; }
+        .error-code { font-size: 4rem; }
+        .error-message { font-size: 1.4rem; }
+        .error-icon { font-size: 4rem; }
+    }
+</style>
+</head>
+<body>
+    <div class="animated-doodles" id="doodle-bg">
+        </div>
+    
+    <div class="page-title-container">
+        <h1 class="page-title">
+            LOST IN THE MATRIX
+        </h1>
+    </div>
+
+    <div class="main-container">
+        <div class="error-card">
+            <i class="fas fa-exclamation-circle error-icon"></i>
+            
+            <div class="error-code">
+                404
+            </div>
+            
+            <div class="error-message">
+                Resource Not Available
+            </div>
+
+            <div class="error-details">
+                It seems the pathway you requested is currently unreachable or does not exist. Please check the URL for errors, or return to the main hub.
+            </div>
+            
+            <div class="error-link">
+                <a href="{{url_for('main')}}">
+                    <i class="fas fa-arrow-circle-left"></i> Return to Safety
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        &copy; <span id="current-year"></span> ADAM: A Dynamic Assessment Module. All rights reserved.
+    </footer>
+
+    <script>
+        const ICON_CLASSES = [
+            'fa-solid fa-microscope', 'fa-solid fa-flask', 'fa-solid fa-magnet', 'fa-solid fa-atom',
+            'fa-solid fa-flask-vial', 'fa-solid fa-vial', 'fa-solid fa-vials', 'fa-solid fa-biohazard',
+            'fa-solid fa-brain', 'fa-solid fa-capsules', 'fa-solid fa-circle-radiation',
+            'fa-solid fa-clipboard-check', 'fa-solid fa-dna', 'fa-solid fa-frog',
+            'fa-brands fa-galactic-republic', 'fa-solid fa-seedling', 'fa-brands fa-space-awesome',
+            'fa-solid fa-rocket', 'fa-solid fa-robot'
+        ];
+
+        const BACKGROUND_ELEMENTS_COUNT = 45; 
+        const container = document.getElementById('doodle-bg');
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function createFloatingIcon() {
+            const iconElement = document.createElement('i');
+            const randomIconClass = ICON_CLASSES[getRandomInt(0, ICON_CLASSES.length - 1)];
+            iconElement.className = 'floating-icon ' + randomIconClass;
+            const size = getRandomInt(15, 40);
+            iconElement.style.fontSize = `${size}px`;
+            iconElement.style.left = `${getRandomInt(0, 100)}%`;
+            iconElement.style.bottom = `${getRandomInt(-50, -100)}px`;
+            const duration = getRandomInt(20, 50);
+            const delay = getRandomInt(0, 40);
+            iconElement.style.animation = `float-up ${duration}s linear ${delay}s infinite`;
+            iconElement.style.transform = `translateX(${getRandomInt(-50, 50)}px) rotate(${getRandomInt(0, 360)}deg)`;
+
+            container.appendChild(iconElement);
+        }
+
+        function initBackground() {
+            for (let i = 0; i < BACKGROUND_ELEMENTS_COUNT; i++) {
+                createFloatingIcon();
+            }
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+        }
+
+        window.onload = initBackground;
+    </script>
+</body>
+</html>

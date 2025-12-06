@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student - ADAM: A Dynamic Assessment Module</title>
+
+    <!-- Font Awesome (Required for icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Poppins Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    /* 🎨 Color Palette: Custom Light Blue/Teal/Cyan Theme (Copied from index.html) */
+    :root {
+        --background-light: #f0f8ff; /* Alice Blue (Very Light Background) */
+        --panel-background: #ffffff; /* White for card background */
+        --primary-color: #11b5e4; /* Vibrant Cyan (Titles/Main Buttons) */
+        --text-color: #034748; /* Dark Teal (Body Text) - Remains dark for contrast */
+        --secondary-color: #0caadc; /* Medium Blue/Teal (Doodles and Button Base) */
+        --accent-color: #1481ba; /* Rich Blue (Icons and Card Borders/Button Accent) */
+        --shadow-color: rgba(0, 0, 0, 0.1); /* Reduced shadow for light theme */
+    }
+
+    /* --- Base Styles and Centering --- */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    html, body {
+        height: 100%;
+        font-family: 'Poppins', sans-serif;
+        color: var(--text-color);
+    }
+
+    body {
+        min-height: 100vh;
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        /* Using the light color for the body background */
+        background: var(--background-light); 
+        position: relative; 
+        padding: 40px 20px 70px 20px; 
+        justify-content: center;
+        overflow: hidden; 
+    }
+    
+    /* --- Animated Icon Background Container (from index.html) --- */
+    .animated-doodles {
+        position: fixed; 
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1; 
+        pointer-events: none;
+    }
+
+    /* --- Floating Icon Styling (from index.html) --- */
+    .floating-icon {
+        position: absolute;
+        display: block;
+        color: var(--secondary-color);
+        opacity: 0.08;
+        text-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+    }
+    
+    @keyframes float-up {
+        0% { transform: translateY(0) rotate(0deg); opacity: 0.08; }
+        50% { opacity: 0.12; }
+        100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+    }
+
+
+    /* --- Main Content Card (Student Portal Box) --- */
+    .main-card {
+        background-color: var(--panel-background);
+        padding: 40px 30px;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px var(--shadow-color);
+        width: 90%;
+        max-width: 500px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        z-index: 10;
+        min-height: 250px;
+        /* CRITICAL: Set position relative for absolute child positioning */
+        position: relative; 
+    }
+
+    /* --- Back Link Styling (MOVED INSIDE CARD, ABSOLUTE POSITIONED) --- */
+    .back-link {
+        /* Positioned absolutely within the .main-card */
+        position: absolute; 
+        top: 15px; 
+        left: 15px;
+        z-index: 20; 
+    }
+
+    .back-link a {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px; /* Slightly smaller gap */
+        text-decoration: none;
+        color: var(--accent-color);
+        font-weight: 600;
+        /* Smaller font size for discrete placement inside the card */
+        font-size: 0.9rem; 
+        padding: 6px 12px;
+        border-radius: 50px;
+        transition: background-color 0.3s, color 0.3s, transform 0.2s;
+        /* No background shadow needed as it's on a white card */
+        background-color: transparent;
+    }
+    
+    .back-link a:hover {
+        background-color: rgba(20, 129, 186, 0.1); /* Light blue background on hover */
+        color: var(--primary-color);
+        transform: scale(1.05);
+    }
+    
+    .back-link i {
+        font-size: 1.1rem;
+    }
+
+    /* --- Content Below the Back Link --- */
+    .main-card > i.fas {
+        /* Adjusted margin top to ensure the main icon isn't too close to the absolute back button */
+        margin-top: 10px; 
+    }
+
+    .main-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 5px;
+        /* text-shadow: 0 0 5px rgba(17, 181, 228, 0.3); */
+    }
+
+    .main-subtitle {
+        font-size: 1.1rem;
+        color: var(--accent-color);
+        margin-bottom: 30px;
+        font-weight: 400;
+    }
+
+    /* --- Form Styling --- */
+    .quiz-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 350px;
+        align-items: center;
+    }
+
+    .quiz-input {
+        width: 100%;
+        padding: 12px 20px;
+        border: 2px solid var(--accent-color);
+        border-radius: 10px;
+        font-size: 1rem;
+        color: var(--text-color);
+        outline: none;
+        transition: border-color 0.3s, box-shadow 0.3s;
+        text-align: center;
+    }
+
+    .quiz-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 8px rgba(17, 181, 228, 0.5);
+    }
+
+
+    /* --- Notification/Flash Message Styles --- */
+.flash-message {
+    /* Positioned absolutely on top of the card or fixed on the screen */
+    position: absolute; /* Relative to the main-card */
+    top: -60px; /* Position it above the card */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 95%; /* Take up most of the card width */
+    max-width: 450px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 50; /* Ensure it's above other elements */
+    opacity: 0;
+    animation: fadeInSlideDown 0.4s ease-out forwards;
+}
+
+@keyframes fadeInSlideDown {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -10px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+/* Error-specific styling */
+.flash-message.error {
+    background-color: #ffe0e0; /* Very light red */
+    border: 1px solid #ff3333; /* Red border */
+    color: #cc0000; /* Darker red text */
+}
+
+/* Success-specific styling (optional, for other types of flashes) */
+.flash-message.success {
+    background-color: #e6ffe6;
+    border: 1px solid #33cc33;
+    color: #008000;
+}
+
+    /* --- Submit Button Styling (Matching index.html button) --- */
+    .submit-btn {
+        display: inline-block;
+        padding: 12px 35px;
+        width: 100%;
+        cursor: pointer;
+        /* Gradient from Medium Blue/Teal to Vibrant Cyan */
+        background: linear-gradient(45deg, var(--secondary-color) 0%, var(--primary-color) 100%); 
+        color: #ffffff; /* White text for contrast */
+        text-decoration: none;
+        font-weight: 600;
+        border: none;
+        border-radius: 50px;
+        /* box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); */
+        transition: background 0.3s ease, transform 0.3s ease;
+        font-size: 1.1rem;
+    }
+
+    .submit-btn:hover {
+        /* Hover state uses a slightly deeper shade or just the accent color */
+        background: var(--accent-color); 
+        transform: translateY(-2px) scale(1.02); 
+        /* box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); */
+    }
+
+    /* --- Footer Styling (from index.html) --- */
+    .footer {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: var(--text-color);
+        opacity: 0.6;
+        font-size: 0.8rem;
+        text-align: center;
+        z-index: 5;
+    }
+
+</style>
+</head>
+<body>
+    <div class="animated-doodles" id="doodle-bg">
+        <!-- Icons will be dynamically injected here by JavaScript -->
+    </div>
+    
+    <div class="main-card">
+        <!-- The back-link is now inside the main-card and absolutely positioned -->
+        <div class="back-link">
+            <a href="{{url_for('main')}}">
+                <i class="fas fa-arrow-left"></i> 
+                Back
+            </a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+        
+        <i class="fas fa-user-graduate" style="font-size: 3.5rem; color: var(--accent-color); margin-bottom: 20px;"></i>
+        <h1 class="main-title">Student Portal</h1>
+        <div class="main-subtitle">Enter Quiz ID to begin your assessment</div>
+        
+        <form class="quiz-form" action="{{url_for('student')}}" method="post">
+            <input type="text" class="quiz-input" name="quizID" placeholder="e.g., SCI-301-QZ-A" required>
+            <input type="submit" value="Go to Quiz" class="submit-btn">
+        </form>
+    </div>
+
+    <footer class="footer">
+        &copy; <span id="current-year"></span> ADAM: A Dynamic Assessment Module. All rights reserved.
+    </footer>
+
+    <script>
+
+
+        
+
+
+        // Array of Font Awesome classes provided by the user (from index.html)
+        const ICON_CLASSES = [
+            'fa-solid fa-microscope', 'fa-solid fa-flask', 'fa-solid fa-magnet', 'fa-solid fa-atom',
+            'fa-solid fa-flask-vial', 'fa-solid fa-vial', 'fa-solid fa-vials', 'fa-solid fa-biohazard',
+            'fa-solid fa-brain', 'fa-solid fa-capsules', 'fa-solid fa-circle-radiation', 
+            'fa-solid fa-clipboard-check', 'fa-solid fa-dna', 'fa-solid fa-frog',
+            'fa-brands fa-galactic-republic', 'fa-solid fa-seedling', 'fa-brands fa-space-awesome',
+            'fa-solid fa-rocket', 'fa-solid fa-robot'
+        ];
+
+        // Increased the count from 20 to 45 for a denser, more active background
+        const BACKGROUND_ELEMENTS_COUNT = 45; 
+        const container = document.getElementById('doodle-bg');
+
+        /**
+         * Generates a random integer between min (inclusive) and max (inclusive).
+         */
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        /**
+         * Creates and styles a single floating icon element.
+         */
+        function createFloatingIcon() {
+            const iconElement = document.createElement('i');
+            
+            // 1. Assign a random icon class
+            const randomIconClass = ICON_CLASSES[getRandomInt(0, ICON_CLASSES.length - 1)];
+            iconElement.className = 'floating-icon ' + randomIconClass;
+            
+            // 2. Random size
+            const size = getRandomInt(15, 40);
+            iconElement.style.fontSize = `${size}px`;
+            
+            // 3. Random horizontal position (0% to 100% of screen width)
+            iconElement.style.left = `${getRandomInt(0, 100)}%`;
+
+            // 4. Initial vertical position (starting just below the screen)
+            iconElement.style.bottom = `${getRandomInt(-50, -100)}px`;
+            
+            // 5. Random animation duration (to vary speeds) and delay (to stagger start)
+            const duration = getRandomInt(20, 50); // Seconds
+            const delay = getRandomInt(0, 40); // Seconds
+            iconElement.style.animation = `float-up ${duration}s linear ${delay}s infinite`;
+            
+            // 6. Apply a slight random skew/rotation bias
+            iconElement.style.transform = `translateX(${getRandomInt(-50, 50)}px) rotate(${getRandomInt(0, 360)}deg)`;
+
+            container.appendChild(iconElement);
+        }
+
+        /**
+         * Initializes the dynamic background by generating all icons and setting the year.
+         */
+        function initBackground() {
+            for (let i = 0; i < BACKGROUND_ELEMENTS_COUNT; i++) {
+                createFloatingIcon();
+            }
+            // Set current year in the footer
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+        }
+        const flashMessages = document.querySelectorAll('.flash-message');
+        
+        flashMessages.forEach(msg => {
+            // Set a timeout to start the fade-out process after 5 seconds
+            const autoHideDelay = 1000; // 1 seconds
+            const fadeOutDuration = 100; // 0.1 seconds for the transition
+
+            setTimeout(() => {
+                // Apply the transition property before changing opacity
+                msg.style.transition = `opacity ${fadeOutDuration / 1000}s ease-out`;
+                
+                // Start the fade-out
+                msg.style.opacity = '0';
+                
+                // Remove the element from the DOM after the transition is complete
+                setTimeout(() => {
+                    msg.remove();
+                }, fadeOutDuration);
+                
+            }, autoHideDelay); 
+        });
+
+        // Wait for the window to load before running the script
+        window.onload = initBackground;
+
+    </script>
+</body>
+</html>

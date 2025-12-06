@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - ADAM: A Dynamic Assessment Module</title>
+    
+    <!-- Font Awesome (Required for icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Poppins Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    /* 🎨 Theme Colors (Consistent with previous file) */
+    :root {
+        --background-light: #f0f8ff; /* Alice Blue (Very Light Background) */
+        --panel-background: #ffffff; /* White for card background */
+        --primary-color: #11b5e4; /* Vibrant Cyan (Titles/Main Buttons) */
+        --text-color: #034748; /* Dark Teal (Body Text) */
+        --secondary-color: #0caadc; /* Medium Blue/Teal */
+        --accent-color: #1481ba; /* Rich Blue (Icons and Borders) */
+        --shadow-color: rgba(0, 0, 0, 0.15); /* Shadow for main box */
+        --header-bg: #e6f7ff; /* Light blue header/table striping */
+        --action-caution: #ff9f1c; /* A softer, yellow-orange for caution */
+        --action-caution-dark: #e08b1a; 
+    }
+
+    /* --- Base Styles --- */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        transition: all 0.3s ease-out;
+    }
+
+    html, body {
+        /* height: 100%; */
+        font-family: 'Poppins', sans-serif;
+        color: var(--text-color);
+    }
+    
+    body {
+        /* Doodle Background */
+        background-color: var(--background-light);
+        background-image: radial-gradient(#d3e8f6 0.5px, transparent 0.5px);
+        background-size: 15px 15px;
+
+        display: flex;
+        justify-content: center;
+        /* CHANGE 1: Vertically center the dashboard container */
+        align-items: center; 
+        /* min-height: 100vh; */
+        padding: 30px 20px 30px 20px; 
+        position: relative; 
+    }
+
+    /* Main Content Wrapper */
+    .dashboard-container {
+        height: 100%;
+        background-color: var(--panel-background);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px var(--shadow-color);
+        width: 100%;
+        max-width: 1200px;
+        padding: 40px;
+        /* Removed margin-top: 20px; to allow proper vertical centering */
+    }
+
+    /* --- Welcome Section --- */
+    .welcome {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 30px;
+        text-align: center;
+        border-bottom: 3px solid var(--header-bg);
+        padding-bottom: 15px;
+    }
+    .welcome i {
+        margin-right: 15px;
+        color: var(--accent-color);
+    }
+
+    /* --- Quiz Details (Grouped Panels) --- */
+    .dashboard-panels {
+        display: grid;
+        grid-template-columns: 2fr 1fr; /* Two columns: 2/3 for info, 1/3 for action */
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+    
+    .panel {
+        background-color: var(--header-bg);
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .panel-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--accent-color);
+        margin-bottom: 15px;
+        border-bottom: 2px solid var(--primary-color);
+        padding-bottom: 5px;
+        display: flex;
+        align-items: center;
+    }
+    .panel-title i {
+        margin-right: 10px;
+    }
+
+    /* Card Grid inside the Quiz Setup Panel */
+    .stat-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+    }
+    
+    .stat-card {
+        background-color: var(--panel-background);
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #d3e8f6;
+        text-align: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    .stat-card i {
+        font-size: 1.4rem;
+        color: var(--primary-color);
+        margin-bottom: 5px;
+    }
+    .stat-card .label {
+        font-size: 0.8em;
+        font-weight: 400;
+        color: #555;
+    }
+    .stat-card .value {
+        font-size: 1.2em;
+        font-weight: 700;
+        color: var(--text-color);
+    }
+
+    /* Action Panel Styles */
+    .action-panel {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 30px;
+        background-color: var(--panel-background);
+        border: 2px solid var(--action-caution);
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .action-panel h4 {
+        color: var(--action-caution-dark);
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+    }
+
+
+    /* --- End Quiz Button Styling --- */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 25px;
+        cursor: pointer;
+        /* Caution color scheme */
+        background-color: var(--action-caution);
+        color: var(--text-color); 
+        font-weight: 600;
+        border: 2px solid var(--action-caution-dark);
+        border-radius: 50px;
+        box-shadow: 0 4px 10px rgba(255, 159, 28, 0.4);
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        font-size: 1em;
+        width: 100%;
+        max-width: 300px;
+    }
+    .btn:hover {
+        background-color: var(--action-caution-dark);
+        color: white; /* Text turns white on hover */
+        transform: translateY(-2px);
+    }
+    .btn i {
+        margin-right: 8px;
+    }
+
+
+    /* --- Student Results Table --- */
+    .results-section h3 {
+        color: var(--accent-color);
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        padding-bottom: 5px;
+        border-bottom: 2px solid var(--header-bg);
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        /* CHANGE 2: Make the table scrollable vertically */
+        max-height: 320px; /* Set maximum height before scrolling starts */
+        overflow-y: auto;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.95em;
+        margin-bottom: 0; /* Important for scrollable containers */
+    }
+
+    th, td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    thead th {
+        background-color: var(--accent-color);
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        /* Fix the header row when scrolling */
+        position: sticky;
+        top: 0; 
+        z-index: 10;
+    }
+    
+    tbody tr:nth-child(even) {
+        background-color: var(--header-bg);
+    }
+    
+    tbody tr:hover {
+        background-color: #d3e8f6;
+    }
+
+    /* Mobile Table View */
+    @media (max-width: 900px) {
+        /* Switch to single column for panels on tablet/mobile */
+        .dashboard-panels {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 600px) {
+        /* Reduce max-height for scrollability on smaller screens */
+        .table-responsive {
+            max-height: 350px;
+        }
+
+        .dashboard-container {
+            padding: 20px;
+        }
+        
+        table, thead, tbody, th, td, tr { 
+            display: block; 
+        }
+        
+        thead tr {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+        }
+        
+        tr { 
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+        
+        td {
+            border: none;
+            border-bottom: 1px solid #eee;
+            position: relative;
+            padding-left: 50%;
+        }
+        
+        td:before {
+            position: absolute;
+            top: 12px;
+            left: 6px;
+            width: 45%;
+            padding-right: 10px;
+            white-space: nowrap;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+        
+        td:nth-of-type(1):before { content: "Sr."; }
+        td:nth-of-type(2):before { content: "Student ID"; }
+        td:nth-of-type(3):before { content: "Student Name"; }
+        td:nth-of-type(4):before { content: "Father Name"; }
+        td:nth-of-type(5):before { content: "Marks Obtained"; }
+        
+        .stat-card { padding: 10px; }
+    }
+    
+</style>
+</head>
+<body>
+  <div>
+      
+    <div class="dashboard-container">
+        <!-- The back-link is now inside the main-card and absolutely positioned -->
+        <div class="back-link">
+            <a href="{{url_for('main')}}">
+                <i class="fas fa-arrow-left"></i> 
+                Back
+            </a>
+        </div>
+        
+        
+        <!-- Welcome Header -->
+        <div class="welcome">
+            <i class="fas fa-graduation-cap"></i> ADAM Teacher Dashboard
+        </div>
+        
+        <!-- Quiz Details Panels -->
+        <div class="dashboard-panels">
+            
+            <!-- 1. Quiz Setup & Stats Panel -->
+            <div class="panel quiz-setup-panel">
+                <h2 class="panel-title"><i class="fas fa-info-circle"></i> Active Quiz Summary</h2>
+                
+                <div class="stat-cards-grid">
+                    
+                    <div class="stat-card">
+                        <i class="fas fa-book-open"></i>
+                        <div class="value">{{data['subject']}}</div>
+                        <div class="label">Subject</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <i class="fas fa-fingerprint"></i>
+                        <div class="value">{{data['quizID']}}</div>
+                        <div class="label">Quiz ID</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <i class="fas fa-calendar-alt"></i>
+                        <div class="value">{{data['created_on']}}</div>
+                        <div class="label">Created On (UTC)</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <i class="fas fa-users"></i>
+                        <div class="value">{{data['classDB']}}</div>
+                        <div class="label">Class</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <i class="fas fa-question-circle"></i>
+                        <div class="value">10</div>
+                        <div class="label">Total Questions</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <i class="fas fa-users-cog"></i>
+                        <div class="value">Prof. {{data['name']}}</div>
+                        <div class="label">Creator</div>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <!-- 2. Action and Controls Panel -->
+            <div class="panel action-panel">
+                <script>console.log("{{data}}")</script>
+                {% if data['quiz_ended'] %}
+
+                    <h2 class="panel-title" style="color: var(--action-success-dark); border-color: var(--action-success);"><i class="fas fa-check-circle"></i> Session Complete</h2>
+                    
+                    <p style="margin-bottom: 20px; font-size: 0.95em;">
+                        The quiz session is officially closed. Download the final results report below.
+                    </p>
+                    
+                    <a href="{{ url_for('download_report', teacher_id=data['id']) }}" class="btn btn-success" onclick="setTimeout(function(){ window.location.reload(); }, 500);" 
+    target="_blank">
+                        <i class="fas fa-download"></i> Download Final Report
+                    </a>
+                    
+                {% else %}
+                    <h2 class="panel-title" style="color: var(--action-caution-dark); border-color: var(--action-caution);"><i class="fas fa-exclamation-triangle"></i> Session Control</h2>
+                    
+                    <p style="margin-bottom: 20px; font-size: 0.95em;">
+                        Use this control to immediately stop the quiz session and finalize student results. <b>This action cannot be undone.</b>
+
+                    </p>
+                    
+                    <form method="POST" action="{{url_for('teacher_dashboard')}}">
+                        <input type="hidden" name="action" value="end_quiz">
+                        <button type="submit" class="btn">
+                            <i class="fas fa-power-off"></i> End Live Quiz Session
+                        </button>
+                    </form>
+                    
+                {% endif %}
+                
+            </div>
+
+        <!-- Student Results Table -->
+        <div class="results-section">
+            <h3><i class="fas fa-chart-bar"></i> Student Results (Scrollable)</h3>
+            
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sr.</th>
+                            <th>Student ID</th>
+                            <th>Student Name</th>
+                            <!-- <th>Father Name</th> -->
+                            <th>Marks Obtained (Out of 10)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if data['classData'] and data['classData']|length > 0 %}
+                            
+                            {% for id, name, total_marks, obtained_marks in data['classData'] %}
+                            <tr>
+                                <td data-label="Sr.">{{ "%02d" | format(loop.index) }}</td>
+                                
+                                <td data-label="Student ID">{{ id }}</td>
+                                <td data-label="Student Name">{{ name }}</td>
+                                <td data-label="Marks Obtained">{{ obtained_marks }} / {{ total_marks }}</td>
+                            </tr>
+                            {% endfor %}
+                            
+                        {% else %}
+                            {# Display a message when no data is available or the quiz is empty #}
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #888; padding: 20px;">
+                                    <i class="fas fa-exclamation-circle" style="margin-right: 8px;"></i> 
+                                    No student results data available yet or the class list is empty.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+  </div>
+    <script>
+        // Custom replacement for alert() to show a toast message 
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            
+            // Set up styles for the toast notification
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px; 
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: ${isError ? '#dc3545' : '#28a745'};
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                z-index: 100;
+                opacity: 0;
+                transition: opacity 0.5s ease;
+                font-weight: 500;
+                cursor: pointer;
+            `;
+            document.body.appendChild(toast);
+            
+            // Show toast
+            setTimeout(() => {
+                toast.style.opacity = '1';
+            }, 10);
+
+            // Hide toast after 3 seconds or on click
+            const hideToast = () => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        document.body.removeChild(toast);
+                    }
+                }, 500);
+            };
+
+            toast.addEventListener('click', hideToast);
+            setTimeout(hideToast, 3000);
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADAM: A Dynamic Assessment Module</title>
+
+    <!-- Font Awesome (Required for icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Poppins Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    /* 🎨 Color Palette: Custom Light Blue/Teal/Cyan Theme */
+    :root {
+        --background-light: #f0f8ff; /* Alice Blue (Very Light Background) */
+        --panel-background: #ffffff; /* White for card background */
+        --primary-color: #11b5e4; /* Vibrant Cyan (Titles/Main Buttons) */
+        --text-color: #034748; /* Dark Teal (Body Text) - Remains dark for contrast */
+        --secondary-color: #0caadc; /* Medium Blue/Teal (Doodles and Button Base) */
+        --accent-color: #1481ba; /* Rich Blue (Icons and Card Borders/Button Accent) */
+        --shadow-color: rgba(0, 0, 0, 0.1); /* Reduced shadow for light theme */
+    }
+
+    /* --- Base Styles and Centering --- */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    html, body {
+        height: 100%;
+        font-family: 'Poppins', sans-serif;
+        color: var(--text-color);
+    }
+
+    body {
+        height: 100%;
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        /* Now using the light color for the body background */
+        background: var(--background-light); 
+        position: relative; 
+        padding: 40px 20px 70px 20px; /* Added padding for footer */
+        justify-content: center;
+        /* overflow: hidden; Prevent background elements from causing scrollbars */
+    }
+    
+    /* --- Animated Icon Background Container --- */
+    .animated-doodles {
+        position: fixed; 
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1; 
+        pointer-events: none; /* Allows clicks to pass through */
+    }
+
+    /* --- Styling for the floating icons --- */
+    .floating-icon {
+        position: absolute;
+        display: block;
+        color: var(--secondary-color); /* Medium Blue/Teal for subtle background */
+        opacity: 0.08; /* Reduced opacity for subtlety on light background */
+        text-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Animation Keyframes: Movement (Upward and Diagonal) and Rotation */
+    @keyframes float-up {
+        /* Start position (bottom of screen) */
+        0% { transform: translateY(0) rotate(0deg); opacity: 0.08; }
+        50% { opacity: 0.12; }
+        /* End position (100vh above the start position) */
+        100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* --- Title Area (No changes needed, but included for completeness) --- */
+    .page-title-container {
+        margin-bottom: 30px; 
+        text-align: center;
+        z-index: 10;
+        padding: 10px;
+        max-width: 900px; 
+        width: 90%;
+    }
+    
+    .page-title {
+        font-size: 2.5rem;
+        color: var(--primary-color); /* Vibrant Cyan */
+        font-weight: 700;
+    }
+    
+    .page-title span {
+        font-weight: 400;
+        display: block;
+        font-size: 1.2rem;
+        color: var(--accent-color); /* Rich Blue subtext */
+        margin-top: 5px;
+    }
+
+    /* --- Main Container Layout --- */
+    .main-container {
+        display: flex;
+        flex-wrap: wrap; 
+        gap: 30px;
+        padding: 40px;
+        max-width: 900px; 
+        width: 90%;
+        /* White foreground panel */
+        background-color: rgba(255, 255, 255, 0.98); 
+        border-radius: 20px;
+        /* Softer shadow against the light background */
+        box-shadow: 0 20px 40px var(--shadow-color); 
+        z-index: 10;
+    }
+
+    /* --- Panel (Card) Styling and Hover Animations (Unchanged) --- */
+    .panel-card {
+        flex: 1 1 350px; 
+        min-height: 250px;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--panel-background);
+        border-radius: 15px;
+        text-align: center;
+        transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                    box-shadow 0.4s ease, 
+                    border 0.4s ease;
+        border: 2px solid transparent; 
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .panel-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        border: 2px solid var(--accent-color); /* Rich Blue for border */
+    }
+
+    .panel-card i {
+        font-size: 3rem;
+        color: var(--accent-color); /* Rich Blue icon color */
+        margin-bottom: 15px;
+        transition: color 0.3s ease, transform 0.3s ease;
+    }
+
+    .panel-card:hover i {
+        color: var(--primary-color); /* Vibrant Cyan on hover */
+        transform: rotate(5deg) scale(1.05);
+    }
+
+    .panel-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: var(--primary-color);
+    }
+
+    /* --- Link Button Styling --- */
+    .panel-link a {
+        display: inline-block;
+        padding: 10px 25px;
+        margin-top: 15px;
+        /* Gradient from Medium Blue/Teal to Vibrant Cyan */
+        background: linear-gradient(45deg, var(--secondary-color) 0%, var(--primary-color) 100%); 
+        color: #ffffff; /* White text for contrast */
+        text-decoration: none;
+        font-weight: 600;
+        border-radius: 50px;
+        border: 1px solid var(--accent-color);
+        /* box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); */
+        transition: background 0.3s ease, transform 0.3s ease;
+    }
+
+    .panel-link a:hover {
+        /* Hover state uses a slightly deeper shade or just the primary color */
+        background: white; 
+        color: var(--accent-color); 
+        border: 1px solid var(--accent-color);
+        transform: translateY(-2px) scale(1.05); 
+    }
+    
+    /* --- Footer Styling --- */
+    .footer {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: var(--text-color); /* Dark text for light background */
+        opacity: 0.6;
+        font-size: 0.8rem;
+        text-align: center;
+        z-index: 5;
+    }
+
+    /* --- Responsive Adjustments (Unchanged) --- */
+    @media (max-width: 800px) {
+        body{
+            height: 130vh;
+        }
+        .page-title {
+            font-size: 1.8rem;
+        }
+
+        .main-container {
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .panel-card {
+            flex-basis: 100%;
+        }
+    }
+</style>
+</head>
+<body>
+    <div class="animated-doodles" id="doodle-bg">
+        <!-- Icons will be dynamically injected here by JavaScript -->
+    </div>
+    
+    <div class="page-title-container">
+        <h1 class="page-title">
+            ADAM: A Dynamic Assessment Module
+        </h1>
+        <span>Select your role to continue. Access application guide <a href="{{url_for('instructions')}}">here</a>.</span>
+    </div>
+
+    <div class="main-container">
+        <div class="panel-card teacher-panel">
+            <i class="fas fa-chalkboard-teacher"></i>
+            <div class="panel-title">
+                Teacher
+            </div>
+            <div class="panel-link">
+                <a href="{{url_for('teacher')}}">Access Teacher Portal</a>
+            </div>
+        </div>
+
+        <div class="panel-card student-panel">
+            <i class="fas fa-user-graduate"></i>
+            <div class="panel-title">
+                Student
+            </div>
+            <div class="panel-link">
+                <a href="{{url_for('student')}}">Access Student Portal</a>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        &copy; <span id="current-year"></span> ADAM: A Dynamic Assessment Module. All rights reserved.
+    </footer>
+
+    <script>
+        // Array of Font Awesome classes provided by the user
+        const ICON_CLASSES = [
+            'fa-solid fa-microscope',
+            'fa-solid fa-flask',
+            'fa-solid fa-magnet',
+            'fa-solid fa-atom',
+            'fa-solid fa-flask-vial',
+            'fa-solid fa-vial',
+            'fa-solid fa-vials',
+            'fa-solid fa-biohazard',
+            'fa-solid fa-brain',
+            'fa-solid fa-capsules',
+            'fa-solid fa-circle-radiation',
+            'fa-solid fa-clipboard-check',
+            'fa-solid fa-dna',
+            'fa-solid fa-frog',
+            'fa-brands fa-galactic-republic',
+            'fa-solid fa-seedling',
+            'fa-brands fa-space-awesome',
+            'fa-solid fa-rocket',
+            'fa-solid fa-robot'
+        ];
+
+        // Increased the count from 20 to 45 for a denser, more active background
+        const BACKGROUND_ELEMENTS_COUNT = 45; 
+        const container = document.getElementById('doodle-bg');
+
+        /**
+         * Generates a random integer between min (inclusive) and max (inclusive).
+         */
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        /**
+         * Creates and styles a single floating icon element.
+         */
+        function createFloatingIcon() {
+            const iconElement = document.createElement('i');
+            
+            // 1. Assign a random icon class
+            const randomIconClass = ICON_CLASSES[getRandomInt(0, ICON_CLASSES.length - 1)];
+            iconElement.className = 'floating-icon ' + randomIconClass;
+            
+            // 2. Random size
+            const size = getRandomInt(15, 40);
+            iconElement.style.fontSize = `${size}px`;
+            
+            // 3. Random horizontal position (0% to 100% of screen width)
+            iconElement.style.left = `${getRandomInt(0, 100)}%`;
+
+            // 4. Initial vertical position (starting just below the screen)
+            // Ensures icons start completely below the fold.
+            iconElement.style.bottom = `${getRandomInt(-50, -100)}px`;
+            
+            // 5. Random animation duration (to vary speeds) and delay (to stagger start)
+            const duration = getRandomInt(20, 50); // Seconds
+            const delay = getRandomInt(0, 40); // Seconds
+            iconElement.style.animation = `float-up ${duration}s linear ${delay}s infinite`;
+            
+            // 6. Apply a slight random skew/rotation bias
+            iconElement.style.transform = `translateX(${getRandomInt(-50, 50)}px) rotate(${getRandomInt(0, 360)}deg)`;
+
+            container.appendChild(iconElement);
+        }
+
+        /**
+         * Initializes the dynamic background by generating all icons and setting the year.
+         */
+        function initBackground() {
+            for (let i = 0; i < BACKGROUND_ELEMENTS_COUNT; i++) {
+                createFloatingIcon();
+            }
+            // Set current year in the footer
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+        }
+
+        // Wait for the window to load before running the script
+        window.onload = initBackground;
+
+    </script>
+</body>
+</html>
