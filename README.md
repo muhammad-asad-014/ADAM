@@ -1,6 +1,7 @@
 # 🧠 ADAM: AI-based Dynamic Assessment Module
 
 **ADAM** is a powerful, dynamic web application built with **Flask** that revolutionizes the assessment process. It automatically generates customizable, AI-based quizzes from uploaded educational documents or user-provided topics. It features temporary IDs for secure, time-bound access for teachers and students, and provides automated, downloadable mark sheets.
+**Access Website Here**: https://theadamproject.pythonanywhere.com/
 
 ---
 
@@ -117,4 +118,5 @@ Distributed under the Apache License. See `LICENSE` for more information.
 ## 📧 Contact
 
 will be available soon.
+
 
