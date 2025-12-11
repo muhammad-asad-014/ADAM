@@ -34,19 +34,12 @@ Follow these steps to get a local copy of ADAM up and running on your machine.
     cd ADAM
     ```
 
-2.  **Create and activate a virtual environment using uv:**
+2.  **Install dependencies using uv:**
     ```bash
-    uv venv
-    source .venv/bin/activate  # macOS/Linux
-    .venv\Scripts\activate     # Windows
+    uv install -r requirements.txt
     ```
 
-3.  **Install dependencies using uv:**
-    ```bash
-    uv pip install -r requirements.txt
-    ```
-
-4.  **Configure OpenAI API Key:**
+3.  **Configure OpenAI API Key:**
     * ADAM requires access to the OpenAI API for quiz generation.
     * Create a file named `.env` in the root directory and add your key:
         ```
@@ -54,7 +47,7 @@ Follow these steps to get a local copy of ADAM up and running on your machine.
         ```
     * *Note: Ensure your `requirements.txt` includes the `openai` and `python-dotenv` packages.*
 
-5.  **Run the application:**
+4.  **Run the application:**
     ```bash
     uv run ADAM.py
     ```
@@ -118,5 +111,6 @@ Distributed under the Apache License. See `LICENSE` for more information.
 ## 📧 Contact
 
 will be available soon.
+
 
 
